@@ -37,8 +37,8 @@ The animated diagram follows both paths: document ingestion builds the searchabl
 
 1. **Upload:** FastAPI validates the PDF and extracts page text with PyMuPDF.
 2. **Chunk:** Each page is split into 500-character segments with a 50-character overlap, preserving page numbers.
-3. **Embed and index:** A shared, lazily loaded `all-MiniLM-L6-v2` model turns each segment into a vector. ChromaDB stores the vector, text, filename, and page metadata.
-4. **Retrieve:** The question is embedded with the same model. ChromaDB returns the three nearest passages by default.
+3. **Embed and index:** Gemini Embeddings (`gemini-embedding-001`) turns each segment into a 768-dimensional vector. ChromaDB stores the vector, text, filename, and page metadata.
+4. **Retrieve:** Gemini embeds the question in retrieval-query mode. ChromaDB returns the three nearest passages by default.
 5. **Generate:** The retrieved passages and question are sent to Gemini (`gemini-3.8-flash`) with instructions to stay grounded in the evidence.
 6. **Respond:** The answer is returned to the chat with source filename and page references when available.
 
@@ -46,7 +46,7 @@ The animated diagram follows both paths: document ingestion builds the searchabl
 
 - Upload and index text-based PDF documents
 - Ask natural-language questions about the indexed content
-- Semantic retrieval over locally generated embeddings
+- Semantic retrieval with hosted Gemini embeddings
 - Answers grounded in retrieved passages, with filename and page references
 - Bring your own Gemini API key; it is submitted per request and is not saved by the app
 - Responsive, monochrome chat interface with suggested questions
@@ -59,7 +59,7 @@ The animated diagram follows both paths: document ingestion builds the searchabl
 | Frontend | React 19, Vite 8 |
 | API | FastAPI, Uvicorn |
 | PDF text extraction | PyMuPDF |
-| Chunk embeddings | Sentence Transformers, `all-MiniLM-L6-v2` |
+| Chunk embeddings | Gemini Embeddings API, `gemini-embedding-001` |
 | Vector database | ChromaDB persistent client |
 | Answer generation | Google Gemini API (`gemini-3.8-flash`) |
 
@@ -67,7 +67,7 @@ The animated diagram follows both paths: document ingestion builds the searchabl
 
 ### Prerequisites
 
-- Python 3.10 or later
+- Python 3.11 or later
 - Node.js and npm
 - A Gemini API key for asking questions ([Google AI Studio](https://aistudio.google.com/app/apikey))
 
@@ -99,7 +99,7 @@ uvicorn main:app --reload --host 127.0.0.1 --port 8000
 
 The API is available at `http://127.0.0.1:8000`; interactive API docs are at `http://127.0.0.1:8000/docs`.
 
-> The first embedding-model use downloads `all-MiniLM-L6-v2`, so initial startup or first indexing can take longer.
+> PDF indexing and questions each call Gemini Embeddings. The API key you enter in the UI is sent with both requests and is not saved by the app.
 
 ### 2. Configure and start the frontend
 
@@ -122,7 +122,7 @@ Start Vite:
 npm run dev
 ```
 
-Open the local URL printed by Vite (usually `http://localhost:5173`). In the app, upload a PDF, enter your Gemini API key, and ask a question.
+Open the local URL printed by Vite (usually `http://localhost:5173`). In the app, enter your Gemini API key, upload a PDF, and ask a question. The key is required during upload so the backend can embed document chunks, and again when asking so it can embed the query and generate the answer.
 
 ### Environment variables
 
@@ -143,11 +143,12 @@ Returns a health message and the number of records in the ChromaDB collection.
 
 ### `POST /upload-pdf`
 
-Upload a PDF using `multipart/form-data` with a `file` field.
+Upload a PDF using `multipart/form-data` with `file` and `api_key` fields.
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/upload-pdf" \
-  -F "file=@./document.pdf"
+  -F "file=@./document.pdf" \
+  -F "api_key=YOUR_GEMINI_API_KEY"
 ```
 
 The response includes the filename, extracted page count, created and stored chunk counts, and total collection records.
@@ -172,11 +173,12 @@ The response contains the original question and generated answer. The Gemini key
 
 The project is structured as a Vite frontend and a separate FastAPI backend. A typical setup is **Vercel for the frontend + Render for the backend**.
 
-1. Deploy the backend service and confirm its `/` endpoint responds.
+1. Configure the Render web service with root directory `backend`, build command `pip install -r requirements.txt`, and start command `uvicorn main:app --host 0.0.0.0 --port $PORT`.
 2. Set `VITE_API_URL` in the frontend host to the deployed backend URL, with no trailing slash, then rebuild/redeploy.
 3. The backend allows Vercel `*.vercel.app` deployment origins. If you use a custom frontend domain, set `FRONTEND_ORIGIN` on the backend host to that exact origin (for example, `https://docs.example.com`).
-4. Keep the Gemini API key as a user-provided request value, or design a backend-only secret flow if changing the key model.
+4. The entered Gemini API key is required for PDF upload embeddings and question answering. It is submitted per request and is not written to disk.
 5. Configure persistent storage for `chroma_db` on the backend host. The current ChromaDB path is local (`./chroma_db`); data on an ephemeral deployment filesystem can be lost when the service is replaced.
+6. This deployment uses Gemini Embeddings instead of a local PyTorch model to keep backend memory use lower. Embeddings from the previous `all-MiniLM-L6-v2` collection are incompatible; upload your PDFs again after redeploying.
 
 ## Project structure
 
@@ -186,7 +188,7 @@ The project is structured as a Vite frontend and a separate FastAPI backend. A t
 │   ├── main.py          # FastAPI endpoints and CORS configuration
 │   ├── ingestion.py     # PDF page text extraction
 │   ├── chunking.py      # Page-aware overlapping chunks
-│   ├── embeddings.py    # Sentence Transformer embeddings
+│   ├── embeddings.py    # Gemini hosted document and query embeddings
 │   ├── vector_store.py  # Persistent ChromaDB storage
 │   ├── retrieval.py     # Similarity search
 │   ├── qa.py            # Gemini prompt and answer generation
@@ -201,10 +203,10 @@ The project is structured as a Vite frontend and a separate FastAPI backend. A t
 ## Current limitations
 
 - Scanned/image-only PDFs are not OCR processed; the current pipeline needs extractable PDF text.
-- The app sends retrieved document passages and the question to Gemini to generate an answer. Avoid uploading sensitive documents unless that processing is appropriate for your use case.
+- The app sends document text to Gemini Embeddings while indexing, then sends retrieved passages and the question to Gemini to generate an answer. Avoid uploading sensitive documents unless that processing is appropriate for your use case.
 - The vector collection is shared by the backend instance; this project does not currently provide user accounts or per-user document isolation.
 - Document indexing and vectors depend on the backend’s persistent disk. A fresh or ephemeral instance may need documents uploaded again.
-- The shared embedding model loads only when first needed, avoiding duplicate model instances in a single backend process. The model and its runtime can still exceed very small memory limits.
+- Embedding generation uses the Gemini API, so indexing and retrieval require a valid Gemini API key and network access.
 - Custom frontend domains must be configured with `FRONTEND_ORIGIN` before browser requests will succeed.
 
 ## License

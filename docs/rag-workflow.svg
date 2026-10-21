@@ -85,7 +85,7 @@
     <path class="icon-stroke" d="M458 249h16M458 256h12M492 256h16M492 263h12M526 249h16M526 256h12" />
     <text class="node-title" x="448" y="312">Chunk + embed</text>
     <text class="node-copy" x="448" y="333">500 chars · overlap</text>
-    <text class="node-copy" x="448" y="350">MiniLM vectors</text>
+    <text class="node-copy" x="448" y="350">Gemini vectors</text>
   </g>
 
   <!-- 04 Store -->

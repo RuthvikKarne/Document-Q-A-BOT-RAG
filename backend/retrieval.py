@@ -1,8 +1,8 @@
-from embedding_model import get_embedding_model
+from embeddings import embed_query
 from vector_store import collection
 
 
-def search_documents(question, top_k=3):
+def search_documents(question, api_key, top_k=3):
     if not question.strip():
         raise ValueError("Question cannot be empty.")
 
@@ -10,12 +10,7 @@ def search_documents(question, top_k=3):
     if total_records == 0:
         return []
 
-    model = get_embedding_model()
-    question_embedding = model.encode(
-        question,
-        convert_to_numpy=True,
-    ).tolist()
-
+    question_embedding = embed_query(question, api_key)
     result_count = min(top_k, total_records)
     results = collection.query(
         query_embeddings=[question_embedding],

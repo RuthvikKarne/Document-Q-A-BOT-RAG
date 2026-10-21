@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pymupdf
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -90,7 +90,10 @@ def home():
 # --------------------------------------------------
 
 @app.post("/upload-pdf")
-async def upload_pdf(file: UploadFile = File(...)):
+async def upload_pdf(
+    file: UploadFile = File(...),
+    api_key: str = Form(..., min_length=1, max_length=500),
+):
     """
     Upload a PDF and store its embedded chunks in ChromaDB.
     """
@@ -160,7 +163,7 @@ async def upload_pdf(file: UploadFile = File(...)):
             )
 
         # 3. Generate embeddings.
-        embedded_chunks = generate_embeddings(chunks)
+        embedded_chunks = generate_embeddings(chunks, api_key)
 
         # 4. Store embeddings in ChromaDB.
         stored_count = store_embeddings(

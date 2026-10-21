@@ -32,6 +32,12 @@ export default function App() {
       return;
     }
 
+    const cleanKey = apiKey.trim();
+    if (!cleanKey) {
+      setError("Enter your Gemini API key before uploading a PDF.");
+      return;
+    }
+
     setUploading(true);
     setError("");
     setStatus("Extracting text and creating embeddings...");
@@ -39,6 +45,7 @@ export default function App() {
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
+      formData.append("api_key", cleanKey);
 
       const response = await fetch(`${API_URL}/upload-pdf`, {
         method: "POST",
@@ -387,7 +394,7 @@ export default function App() {
 
               <div>
                 <strong>GEMINI API CREDENTIAL</strong>
-                <small>ENTER YOUR OWN API KEY</small>
+                <small>USED FOR PDF EMBEDDINGS + ANSWERS</small>
               </div>
             </div>
 

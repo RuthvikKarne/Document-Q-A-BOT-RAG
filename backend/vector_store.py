@@ -3,8 +3,8 @@ import chromadb
 client=chromadb.PersistentClient(path="./chroma_db")
 
 collection=client.get_or_create_collection(
-    name="document_chunks",
-    metadata={"hnsw":"cosine"}
+    name="document_chunks_gemini_embedding_001_768",
+    metadata={"hnsw:space": "cosine"}
 )
 def store_embeddings(embedded_chunks,filename):
     if not embedded_chunks:

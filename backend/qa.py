@@ -31,6 +31,7 @@ def answer_question(
     # Retrieve relevant document chunks.
     matches = search_documents(
         question=question,
+        api_key=api_key,
         top_k=top_k
     )
 
