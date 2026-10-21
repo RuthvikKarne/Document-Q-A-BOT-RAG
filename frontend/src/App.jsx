@@ -1,7 +1,10 @@
 import { useRef, useState } from "react";
 import "./App.css";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (
+  import.meta.env.VITE_API_URL ||
+  "https://document-q-a-bot-rag.onrender.com"
+).replace(/\/$/, "");
 
 export default function App() {
   const [apiKey, setApiKey] = useState("");

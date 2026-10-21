@@ -128,7 +128,8 @@ Open the local URL printed by Vite (usually `http://localhost:5173`). In the app
 
 | Variable | Used by | Purpose |
 | --- | --- | --- |
-| `VITE_API_URL` | Frontend | Public base URL for the FastAPI service, such as `https://document-q-a-bot-rag.onrender.com` |
+| `VITE_API_URL` | Frontend | Public base URL for the FastAPI service, such as `https://document-q-a-bot-rag.onrender.com`. The app falls back to the project’s Render URL when unset. |
+| `FRONTEND_ORIGIN` | Backend (optional) | Exact custom frontend origin to allow through CORS; Vercel `*.vercel.app` origins are allowed automatically. |
 
 Vite injects `VITE_` variables into browser code at build time. **Only put the public backend URL here. Never put a Gemini API key or other secret in a `VITE_` variable.** Set the production value in your frontend host’s environment-variable settings and rebuild/redeploy.
 
@@ -173,7 +174,7 @@ The project is structured as a Vite frontend and a separate FastAPI backend. A t
 
 1. Deploy the backend service and confirm its `/` endpoint responds.
 2. Set `VITE_API_URL` in the frontend host to the deployed backend URL, with no trailing slash, then rebuild/redeploy.
-3. Add the exact deployed frontend origin to `allow_origins` in `backend/main.py`. The checked-in CORS configuration currently allows local Vite origins only.
+3. The backend allows Vercel `*.vercel.app` deployment origins. If you use a custom frontend domain, set `FRONTEND_ORIGIN` on the backend host to that exact origin (for example, `https://docs.example.com`).
 4. Keep the Gemini API key as a user-provided request value, or design a backend-only secret flow if changing the key model.
 5. Configure persistent storage for `chroma_db` on the backend host. The current ChromaDB path is local (`./chroma_db`); data on an ephemeral deployment filesystem can be lost when the service is replaced.
 
@@ -203,7 +204,7 @@ The project is structured as a Vite frontend and a separate FastAPI backend. A t
 - The app sends retrieved document passages and the question to Gemini to generate an answer. Avoid uploading sensitive documents unless that processing is appropriate for your use case.
 - The vector collection is shared by the backend instance; this project does not currently provide user accounts or per-user document isolation.
 - Document indexing and vectors depend on the backend’s persistent disk. A fresh or ephemeral instance may need documents uploaded again.
-- CORS must be configured with your actual frontend origin before browser requests from a deployed frontend will succeed.
+- Custom frontend domains must be configured with `FRONTEND_ORIGIN` before browser requests will succeed.
 
 ## License
 
