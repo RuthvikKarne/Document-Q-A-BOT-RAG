@@ -913,54 +913,6 @@ label:focus-visible {
   line-height: 1.9;
 }
 
-.pm-suggestions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
-  margin-top: 27px;
-}
-
-.pm-suggestions button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  min-height: 49px;
-  padding: 11px;
-  border: 1px solid #2b2b23;
-  background: #11110f;
-  color: #c7c7bc;
-  text-align: left;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease;
-}
-
-.pm-suggestions button:hover {
-  border-color: var(--pm-yellow);
-  background: #17170e;
-}
-
-.pm-suggestions button > span:first-child {
-  flex-shrink: 0;
-  color: var(--pm-yellow);
-  font-family: var(--pm-mono);
-  font-size: 9px;
-}
-
-.pm-suggestions button > span:nth-child(2) {
-  flex: 1;
-  font-family: var(--pm-mono);
-  font-size: 8px;
-  line-height: 1.6;
-}
-
-.pm-suggestions button b {
-  color: var(--pm-yellow);
-  font-size: 13px;
-  font-weight: 400;
-}
-
 /* CHAT MESSAGES */
 
 .pm-message-list {
@@ -1421,10 +1373,6 @@ label:focus-visible {
     font-size: 75px;
   }
 
-  .pm-suggestions {
-    grid-template-columns: 1fr;
-  }
-
   .pm-composer-area {
     padding: 0 12px 15px;
   }
@@ -1607,9 +1555,6 @@ label:focus-visible {
 .pm-big-number { color: #eef2f7; }
 .pm-welcome h2 span { color: #b88a16; }
 .pm-welcome > p { color: #66758a; }
-.pm-suggestions button { background: #fff; border-color: #e2e8f0; color: #34445d; border-radius: 10px; }
-.pm-suggestions button:hover { border-color: #d6a923; background: #fffdf6; }
-.pm-suggestions button > span:first-child, .pm-suggestions button b { color: #b18412; }
 .pm-message-avatar { background: #f1f5f9; border-color: #e2e8f0; color: #53647b; border-radius: 10px; }
 .pm-user-message .pm-message-avatar { background: #1c3152; color: #fff; border-color: #1c3152; }
 .pm-message-meta strong { color: #34445d; }
@@ -1642,19 +1587,18 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, label:focus-v
 .pm-brand-text strong span { color: #111; }
 .pm-sidebar, .pm-main-panel, .pm-topbar, .pm-key-panel,
 .pm-key-input-wrap, .pm-key-input-wrap button, .pm-drop-zone,
-.pm-empty-docs, .pm-selected-file, .pm-document, .pm-suggestions button,
+.pm-empty-docs, .pm-selected-file, .pm-document,
 .pm-assistant-message .pm-message-text, .pm-loading, .pm-composer,
 .pm-message-avatar { background-color: #fff; }
 .pm-hero { background-color: #fff; background-image: radial-gradient(#e8e8e8 0.7px, transparent 0.7px); }
 .pm-hero::after { background: linear-gradient(90deg, #fff 0%, #fff 44%, #ffffff20 100%); }
-.pm-drop-zone:hover, .pm-suggestions button:hover { background: #f7f7f7; }
+.pm-drop-zone:hover { background: #f7f7f7; }
 .pm-primary-button, .pm-composer-bottom button,
 .pm-user-message .pm-message-avatar { background: #111; border-color: #111; color: #fff; }
 .pm-primary-button:hover:not(:disabled), .pm-composer-bottom button:hover:not(:disabled) { background: #333; }
 .pm-hero h1 span, .pm-welcome h2 span, .pm-count,
 .pm-document-check, .pm-footer-mark, .pm-key-icon, .pm-file-tag,
-.pm-document-icon, .pm-suggestions button > span:first-child,
-.pm-suggestions button b, .pm-loading strong { color: #222; }
+.pm-document-icon, .pm-loading strong { color: #222; }
 .pm-key-icon, .pm-file-tag, .pm-document-icon { background: #f4f4f4; border-color: #dedede; }
 .pm-art-center { background: #111; color: #fff; box-shadow: 8px 8px 0 #11111118; }
 .pm-art-center::before, .pm-art-center::after { border-color: #fff; }

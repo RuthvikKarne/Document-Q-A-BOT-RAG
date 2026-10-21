@@ -163,13 +163,6 @@ export default function App() {
     }
   }
 
-  function askSuggestion(text) {
-    setQuestion(text);
-    setError("");
-
-    document.getElementById("question-input")?.focus();
-  }
-
   return (
     <div className="pm-app">
       <div className="pm-grain" />
@@ -470,51 +463,6 @@ export default function App() {
                   Ask a question and let PaperMind find the evidence.
                 </p>
 
-                <div className="pm-suggestions">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      askSuggestion("What is the candidate name?")
-                    }
-                  >
-                    <span>01</span>
-                    <span>WHAT IS THE CANDIDATE NAME?</span>
-                    <b>↗</b>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      askSuggestion("Summarize this document")
-                    }
-                  >
-                    <span>02</span>
-                    <span>SUMMARIZE THE DOCUMENT</span>
-                    <b>↗</b>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      askSuggestion("What skills are mentioned?")
-                    }
-                  >
-                    <span>03</span>
-                    <span>FIND SKILLS & QUALIFICATIONS</span>
-                    <b>↗</b>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      askSuggestion("What are the key points?")
-                    }
-                  >
-                    <span>04</span>
-                    <span>EXTRACT KEY POINTS</span>
-                    <b>↗</b>
-                  </button>
-                </div>
               </div>
             ) : (
               <div className="pm-message-list">
