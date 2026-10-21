@@ -37,7 +37,7 @@ The animated diagram follows both paths: document ingestion builds the searchabl
 
 1. **Upload:** FastAPI validates the PDF and extracts page text with PyMuPDF.
 2. **Chunk:** Each page is split into 500-character segments with a 50-character overlap, preserving page numbers.
-3. **Embed and index:** `all-MiniLM-L6-v2` turns each segment into a vector. ChromaDB stores the vector, text, filename, and page metadata.
+3. **Embed and index:** A shared, lazily loaded `all-MiniLM-L6-v2` model turns each segment into a vector. ChromaDB stores the vector, text, filename, and page metadata.
 4. **Retrieve:** The question is embedded with the same model. ChromaDB returns the three nearest passages by default.
 5. **Generate:** The retrieved passages and question are sent to Gemini (`gemini-3.8-flash`) with instructions to stay grounded in the evidence.
 6. **Respond:** The answer is returned to the chat with source filename and page references when available.
@@ -204,6 +204,7 @@ The project is structured as a Vite frontend and a separate FastAPI backend. A t
 - The app sends retrieved document passages and the question to Gemini to generate an answer. Avoid uploading sensitive documents unless that processing is appropriate for your use case.
 - The vector collection is shared by the backend instance; this project does not currently provide user accounts or per-user document isolation.
 - Document indexing and vectors depend on the backend’s persistent disk. A fresh or ephemeral instance may need documents uploaded again.
+- The shared embedding model loads only when first needed, avoiding duplicate model instances in a single backend process. The model and its runtime can still exceed very small memory limits.
 - Custom frontend domains must be configured with `FRONTEND_ORIGIN` before browser requests will succeed.
 
 ## License
