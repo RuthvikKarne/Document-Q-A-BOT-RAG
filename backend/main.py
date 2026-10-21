@@ -1,4 +1,5 @@
 import os
+import re
 import tempfile
 from pathlib import Path
 
@@ -71,6 +72,23 @@ class QuestionRequest(BaseModel):
         ge=1,
         le=10
     )
+
+
+def _safe_error_message(error, api_key):
+    """Return an actionable provider error without exposing credentials."""
+    message = str(error).strip() or type(error).__name__
+
+    if api_key:
+        message = message.replace(api_key, "[redacted API key]")
+
+    # Also redact Google API keys if an SDK error includes one in a request URL.
+    message = re.sub(r"AIza[0-9A-Za-z_-]{20,}", "[redacted API key]", message)
+    message = re.sub(
+        r"(?i)([?&]key=)[^&\s]+",
+        r"\1[redacted]",
+        message,
+    )
+    return message[:500]
 
 
 # --------------------------------------------------
@@ -236,16 +254,16 @@ def ask_question(request: QuestionRequest):
         ) from exc
 
     except Exception as exc:
-        # Never print or return the API key.
+        safe_message = _safe_error_message(exc, request.api_key)
         print(
             f"Question answering error: "
-            f"{type(exc).__name__}: {exc}"
+            f"{type(exc).__name__}: {safe_message}"
         )
 
         raise HTTPException(
-            status_code=500,
+            status_code=502,
             detail=(
-                "Question answering failed. Check the backend "
-                "terminal for the underlying error."
+                "The Gemini request failed. Check that your API key has "
+                f"access to the required Gemini models. Details: {safe_message}"
             )
         ) from exc

@@ -6,6 +6,25 @@ const API_URL = (
   "https://document-q-a-bot-rag.onrender.com"
 ).replace(/\/$/, "");
 
+async function readApiResponse(response, fallbackMessage) {
+  let data;
+
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error(
+      `The backend returned an unreadable response (HTTP ${response.status}). ` +
+        "Check the backend deployment and try again."
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(data.detail || fallbackMessage);
+  }
+
+  return data;
+}
+
 export default function App() {
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
@@ -52,11 +71,7 @@ export default function App() {
         body: formData,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || "PDF processing failed.");
-      }
+      const data = await readApiResponse(response, "PDF processing failed.");
 
       setDocuments((previous) => {
         const existing = previous.filter(
@@ -135,11 +150,10 @@ export default function App() {
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || "Question answering failed.");
-      }
+      const data = await readApiResponse(
+        response,
+        "Question answering failed."
+      );
 
       setMessages((previous) => [
         ...previous,
