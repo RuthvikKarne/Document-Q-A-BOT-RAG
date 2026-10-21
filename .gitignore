@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Local vector database and uploaded/generated data
+chroma_db/
+uploads/
+
+# Node.js dependencies and build output
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+
+# Logs and local tooling
+*.log
+*.local
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
